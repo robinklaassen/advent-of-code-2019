@@ -44,3 +44,14 @@ step. Then:
 intersection tuple in its list
 
 So: _take the time to think about your model_.
+
+### Day 4
+This was an interesting one. The first part was rather easy, 
+especially when I came across using `np.diff()` to check for
+any adjacent groups. Then part 2 had me reeling. The brute force
+solution isn't very elegant, but it has early returns so it could
+have been far worse I guess :')
+
+It's very useful test using simple assertions after defining your
+methods, they get executed every time you run the module. Saves
+you the hassle of an entire unit testing framework.
