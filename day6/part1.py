@@ -1,8 +1,8 @@
 import networkx as nx
 
 
-def construct_graph(filename: str) -> nx.DiGraph:
-    graph = nx.DiGraph()
+def construct_graph(filename: str) -> nx.Graph:
+    graph = nx.Graph()
     with open(filename, 'r') as fp:
         for count, line in enumerate(fp):
             items = line.rstrip().split(")")
@@ -21,11 +21,14 @@ def construct_graph(filename: str) -> nx.DiGraph:
 
 
 def get_orbits_for_object(graph: nx.Graph, space_object: str) -> int:
-    ...
+    return nx.shortest_path_length(graph, space_object, "COM")
 
 
 def get_total_orbits(graph: nx.Graph) -> int:
-    ...
+    orbits = 0
+    for space_object in graph.nodes:
+        orbits += get_orbits_for_object(graph, space_object)
+    return orbits
 
 
 def test_case():
@@ -41,6 +44,9 @@ def test_case():
 
 def main():
     test_case()
+    print("---MAIN---")
+    graph = construct_graph('puzzle_input.txt')
+    print(f"Submit value: {get_total_orbits(graph)}")
 
 
 if __name__ == "__main__":

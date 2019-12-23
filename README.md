@@ -66,3 +66,10 @@ are displayed once again!
 an infinite loop (which also led me to implement a simple but sane
 'max number of iterations before halting' parameter)
 - I forgot to use the parameter mode with opcode 4 (giving output)
+
+### Day 6
+I don't work with graphs often, but it was plain to see this was a
+graph problem, so out came the `networkx` documentation. I even used
+a directed graph first, until I realised in part 2 that I actually
+didn't need that. Problem took me less than an hour which is less
+than all other days so far :')
