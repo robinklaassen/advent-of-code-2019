@@ -2,16 +2,15 @@ import logging
 from typing import List, Tuple
 
 
-MAX_ITERATIONS = int(1e6)
-
 _logger = logging.getLogger(__name__)
 
 
 class IntcodeProgram:
 
-    def __init__(self, program: List[int]):
+    def __init__(self, program: List[int], max_iterations: int = 1_000_000):
         self.initial_program = program
         self.program = []
+        self.max_iterations = max_iterations
 
     def run(self, inputs: List[int]) -> int:
         offset = 0
@@ -19,7 +18,7 @@ class IntcodeProgram:
         inputs = inputs.copy()
         output = None
 
-        for _ in range(MAX_ITERATIONS):
+        for _ in range(self.max_iterations):
             opcode, parameter_modes = self._parse_opcode(self.program[offset])
             if opcode == 99:
                 break
@@ -60,7 +59,7 @@ class IntcodeProgram:
                 self._write_parameter(offset + 3, result)
                 offset += 4
         else:
-            raise Exception(f"Program not halted after {MAX_ITERATIONS} iterations")
+            raise Exception(f"Program not halted after {self.max_iterations} iterations")
         return output
 
     def _parse_opcode(self, number: int) -> Tuple[int, Tuple[int, ...]]:
