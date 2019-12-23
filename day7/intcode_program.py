@@ -9,12 +9,14 @@ class IntcodeProgram:
 
     def __init__(self, program: List[int], max_iterations: int = 1_000_000):
         self.initial_program = program
-        self.program = []
+        self.program = program
         self.max_iterations = max_iterations
+
+    def reset_program(self):
+        self.program = self.initial_program.copy()
 
     def run(self, inputs: List[int]) -> int:
         offset = 0
-        self.program = self.initial_program.copy()
         inputs = inputs.copy()
         output = None
 

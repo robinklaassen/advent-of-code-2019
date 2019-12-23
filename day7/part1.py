@@ -13,6 +13,7 @@ def run_amplifiers(program: IntcodeProgram, phases: Tuple[int, int, int, int, in
         output = program.run([phases[i], input_value])
         # print(f"Output value after amplifier {i}: {output}")
         input_value = output
+        program.reset_program()
     return output
 
 
