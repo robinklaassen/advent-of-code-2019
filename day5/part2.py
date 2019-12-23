@@ -49,17 +49,20 @@ def run_program(initial_program_state: List[int], program_input: int) -> Tuple[L
             result = param1 + param2 if opcode == 1 else param1 * param2
             program_state[program_state[offset + 3]] = result
             offset += 4
-        elif opcode == 3:  # take input
+        elif opcode == 3:  # take input and write
             program_state[program_state[offset + 1]] = program_input
             offset += 2
         elif opcode == 4:  # give output
-            output = program_state[program_state[offset + 1]]
+            # output = program_state[program_state[offset + 1]]
+            output = get_parameter(program_state, offset + 1, parameter_modes[0])
             print(f"Output: {output}")
             offset += 2
         elif opcode in [5, 6]:  # jump if true/false
             param1 = get_parameter(program_state, offset + 1, parameter_modes[0])
             if (opcode == 5 and param1 != 0) or (opcode == 6 and param1 == 0):
                 offset = get_parameter(program_state, offset + 2, parameter_modes[1])
+            else:
+                offset += 3
         elif opcode in [7, 8]:  # less than / equals
             param1 = get_parameter(program_state, offset + 1, parameter_modes[0])
             param2 = get_parameter(program_state, offset + 2, parameter_modes[1])

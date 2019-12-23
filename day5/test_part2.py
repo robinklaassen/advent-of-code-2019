@@ -8,9 +8,12 @@ class IntcodeProgramTestSuite(unittest.TestCase):
     def setUp(self) -> None:
         self.jump_position_mode_program = [3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9]
         self.jump_immediate_mode_program = [3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1]
+        self.larger_program = [3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31,
+                               1106, 0, 36, 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104,
+                               999, 1105, 1, 46, 1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99]
 
     def test_simple_io(self):
-        program = [3,0,4,0,99]
+        program = [3, 0, 4, 0, 99]
         _, output = run_program(initial_program_state=program, program_input=15)
         self.assertEqual(15, output)
 
@@ -50,13 +53,15 @@ class IntcodeProgramTestSuite(unittest.TestCase):
         _, output = run_program(initial_program_state=self.jump_immediate_mode_program, program_input=0)
         self.assertEqual(0, output)
 
-    def test_larger_example(self):
-        program = [3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31,
-                   1106, 0, 36, 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104,
-                   999, 1105, 1, 46, 1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99]
+    def test_larger_program_less(self):
+        _, output = run_program(initial_program_state=self.larger_program, program_input=5)
+        self.assertEqual(999, output)
 
-        expected_results = {7: 999, 8: 1000, 9: 1001}
+    def test_larger_program_equal(self):
+        _, output = run_program(initial_program_state=self.larger_program, program_input=8)
+        self.assertEqual(1000, output)
 
-        for program_input, expected_result in expected_results.items():
-            _, output = run_program(initial_program_state=program, program_input=program_input)
-            self.assertEqual(expected_result, output)
+    def test_larger_program_more(self):
+        _, output = run_program(initial_program_state=self.larger_program, program_input=15)
+        self.assertEqual(1001, output)
+
