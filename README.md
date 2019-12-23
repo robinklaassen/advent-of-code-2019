@@ -52,6 +52,17 @@ any adjacent groups. Then part 2 had me reeling. The brute force
 solution isn't very elegant, but it has early returns so it could
 have been far worse I guess :')
 
-It's very useful test using simple assertions after defining your
+It's very useful to test using simple assertions after defining your
 methods, they get executed every time you run the module. Saves
 you the hassle of an entire unit testing framework.
+
+### Day 5
+The intcode computer returns! And had me struggling. It wasn't until
+I decided to convert all given test cases into separate unit tests 
+that I would start to see the errors. The powers of unit testing
+are displayed once again!
+
+- I forgot to increment the offset in case of 'no jump', causing 
+an infinite loop (which also led me to implement a simple but sane
+'max number of iterations before halting' parameter)
+- I forgot to use the parameter mode with opcode 4 (giving output)
