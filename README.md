@@ -73,3 +73,24 @@ graph problem, so out came the `networkx` documentation. I even used
 a directed graph first, until I realised in part 2 that I actually
 didn't need that. Problem took me less than an hour which is less
 than all other days so far :')
+
+### Day 7
+Intcoding again! Before tackling the problem I decided to implement
+the IntcodeProgram as a formal class, as I expected it to return 
+for a lot more days in this advent. Part 1 then was easily done; 
+I could just reuse the same instance over and over again. After
+re-learning the difference between combinations and permutations 
+the answer rolled out quickly.
+
+Then part 2 came and I had to redesign the interface of my fancy
+new class. Separate functions for starting and receiving input, 
+using a ProgramState `Enum`, and other fancy things. Sure, the
+code could still be refactored to be more elegant, but I'm pretty
+satisfied, and with the new design the solution to part 2 just 
+instantly worked!
+
+### Day 8
+In my mind this puzzle quickly became a 3d NumPy **mess**. Then I
+remembered an earlier lesson, so I simply sliced up the string to
+layers and parsing each layer. Then printing to a monospaced
+terminal works pretty nicely. Not too hard this one.
