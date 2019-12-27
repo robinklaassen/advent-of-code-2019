@@ -94,3 +94,15 @@ In my mind this puzzle quickly became a 3d NumPy **mess**. Then I
 remembered an earlier lesson, so I simply sliced up the string to
 layers and parsing each layer. Then printing to a monospaced
 terminal works pretty nicely. Not too hard this one.
+
+### Day 9
+I've been reading parts of the book Clean Code and decided to do
+some refactoring on the intcode computer first. By introducing
+proper enums I could remove now-redundant comments and unnecessary
+custom exception raising. The unit testing suite still saved me in
+the debugging process, as I had first wrongly implemented the 
+'getting parameters in relative mode' method. Luckily part 2 was
+as simple as changing an input.
+
+When the next challenge for my intcode computer arrives, I'll 
+refactor to use a mapping dict for the opcode handling.
