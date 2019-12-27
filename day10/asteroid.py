@@ -1,13 +1,41 @@
+import math
 from fractions import Fraction
 from typing import Tuple, List
 
 from dataclasses import dataclass
 
 
+ANGLE_ACCURACY = 6
+
+
 @dataclass
 class Asteroid:
     x: int
     y: int
+
+    @property
+    def distance(self) -> float:
+        return math.sqrt(self.x ** 2 + self.y ** 2)
+
+    @property
+    def relative_angle_in_radians(self) -> float:
+        if self.x == 0 and self.y > 0:
+            angle = math.pi / 2
+        elif self.x == 0 and self.y < 0:
+            angle = 3 * math.pi / 2
+        else:
+            angle = math.atan2(self.y, self.x)
+
+        # correct for the fact that 'up' is -y
+        angle = angle + math.pi / 2
+
+        # reduce angle to 0..2pi (0 inclusive, 2pi exclusive)
+        while angle < 0:
+            angle += 2 * math.pi
+        while angle >= 2 * math.pi:
+            angle -= 2 * math.pi
+
+        return round(angle, ndigits=ANGLE_ACCURACY)
 
     def get_linear_params(self, other: 'Asteroid') -> Tuple[Fraction, Fraction]:
         m = Fraction(other.y - self.y, other.x - self.x)

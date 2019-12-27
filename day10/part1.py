@@ -22,7 +22,7 @@ def main():
 
     asteroids = parse_input('puzzle_input.txt')
     target_asteroid, count = find_highest_count(asteroids)
-    print(f"Submit value: {count}")
+    print(f"Target asteroid is {target_asteroid} with view count {count}")
 
 
 if __name__ == "__main__":
