@@ -47,7 +47,7 @@ NUMBER_OF_INPUT_PARAMS_PER_OPCODE = {
 
 class IntcodeComputer:
 
-    def __init__(self, program: List[int], max_iterations: int = 1_000_000, memory_size: int = 1024):
+    def __init__(self, program: List[int], max_iterations: int = 1_000_000, memory_size: int = 10240):
         self.initial_memory = [0] * memory_size
         self.initial_memory[:len(program)] = program
         self.memory = self.initial_memory.copy()
@@ -84,6 +84,9 @@ class IntcodeComputer:
         self.pointer = 0
         self.relative_base = 0
         self.state = ComputerState.READY
+
+    def is_halted(self):
+        return self.state == ComputerState.HALTED
 
     def _run_to_break(self):
         for _ in range(self.max_iterations):

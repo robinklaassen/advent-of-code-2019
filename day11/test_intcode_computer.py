@@ -23,6 +23,12 @@ class IntcodeProgramTestSuite(unittest.TestCase):
         program.pass_input(8)
         self.assertEqual([8], program.read_output())
 
+    def test_max_iterations(self):
+        program = [109, 0]
+        computer = IntcodeComputer(program, max_iterations=100)
+        with self.assertRaises(Exception):
+            computer.start()
+
     def test_larger_program_less(self):
         self.larger_program.start()
         self.larger_program.pass_input(5)
