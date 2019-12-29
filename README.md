@@ -106,3 +106,28 @@ as simple as changing an input.
 
 When the next challenge for my intcode computer arrives, I'll 
 refactor to use a mapping dict for the opcode handling.
+
+### Day 10
+This one was a nice challenge again. I quickly figured to use
+linear functions to determine if two asteroids are on the same
+line, but of course that ran into problems with vertical lines
+and with direction. Still wasn't too hard. Then part 2 forced me
+to abandon my initial approach and resort to calculating angles
+and looping through these. The toughest part was figuring out
+how to transform the coordinate system to start at 'up' which is
+the negative y-axis. After that, smooth sailing.
+
+### Day 11
+Started off with the promised refactoring for the intcode computer
+again relying heavily on my existing test suite. Cannot stress
+the importance of testing enough! Thing back on day 3, I decided
+to forgo NumPy and model using a simple list of pane objects. 
+This got through part 1 relatively quickly but had me figuring
+out how to transpose the coordinate system for printing to grid
+properly. 
+
+### Day 12
+Wow. I used to be a physicist, so this should be easy, right?
+Well part 1 was, definitely. Then part 2 stumped me. First time
+I went to the official subreddit for help. With the explanation
+provided there I went from troublesome to trivial. But darn...
