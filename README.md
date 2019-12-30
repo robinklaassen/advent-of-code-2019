@@ -130,4 +130,12 @@ properly.
 Wow. I used to be a physicist, so this should be easy, right?
 Well part 1 was, definitely. Then part 2 stumped me. First time
 I went to the official subreddit for help. With the explanation
-provided there I went from troublesome to trivial. But darn...
+provided there it went from troublesome to trivial. But darn...
+
+### Day 13
+Arcade gaming! Brilliant. Part 1 was a breeze; I printed the game
+but that wasn't even necessary. Part 2 had me look into Python's
+`curses` library to make it an interactive game, which actually
+worked! Then the problem arose: I couldn't beat the game by hand
+:')  as I visited the subreddit the first suggestion popping up
+there was to make an auto player... easy enough. And fun to watch!
