@@ -4,10 +4,19 @@ from day13.puzzle_input import GAME_PROGRAM
 import numpy as np
 
 
+ARCADE_CHARS = {
+    0: ' ',
+    1: 'X',
+    2: '#',
+    3: '=',
+    4: 'O',
+}
+
+
 def print_grid(grid: np.ndarray):
     for y in range(grid.shape[0]):
-        line = np.array2string(grid[y, :], precision=0, separator='')
-        print(line[1:-1])
+        chars = [ARCADE_CHARS[x] for x in grid[y, :]]
+        print("".join(chars))
 
 
 def main():
