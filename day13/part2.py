@@ -1,5 +1,6 @@
 import curses
-from typing import List, Optional
+from enum import Enum, auto
+from typing import List, Optional, Tuple
 
 import numpy as np
 
@@ -20,8 +21,18 @@ INPUT_MAP = {
 }
 
 
-def draw_output_and_return_score(output: List[int], game_window, score_window) -> Optional[int]:
+class PlayMode(Enum):
+    MANUAL = auto()
+    AUTO = auto()
+
+
+def parse_output(output: List[int],
+                 game_window,
+                 score_window) -> Tuple[Optional[int], Optional[Tuple[int, int]], Optional[Tuple[int, int]]]:
     score = None
+    paddle_pos = None
+    ball_pos = None
+
     for triplet in np.array_split(output, len(output) / 3):
         x, y, val = triplet
         if x == -1 and y == 0:  # val is the game score
@@ -29,20 +40,26 @@ def draw_output_and_return_score(output: List[int], game_window, score_window) -
             score_window.clear()
             score_window.addstr(0, 0, str(score))
         else:  # val is a character on the screen
+            if val == 3:
+                paddle_pos = (x, y)
+            elif val == 4:
+                ball_pos = (x, y)
             game_window.addch(y, x, ARCADE_CHARS[val])
 
     game_window.refresh()
     score_window.refresh()
-    return score
+    return score, paddle_pos, ball_pos
 
 
 def run_terminal(screen):
+    play_mode = PlayMode.AUTO
+
     # Set up screen
     screen_max_y, screen_max_x = screen.getmaxyx()
     curses.curs_set(0)  # disables blinking cursor
     curses.cbreak()  # do not buffer character input
     curses.noecho()  # do not directly echo input
-    curses.halfdelay(2)  # arg = delay for each getch() in tenths of a second
+    # curses.halfdelay(0)  # arg = delay for each getch() in tenths of a second
 
     # Change program to play for free
     program = GAME_PROGRAM.copy()
@@ -64,27 +81,49 @@ def run_terminal(screen):
     score_window = curses.newwin(1, 10, 0, x_size + 3)
     input_window = curses.newwin(1, 1, 3, x_size + 3)
     input_window.keypad(True)
+    input_window.nodelay(True)
 
-    draw_output_and_return_score(output, game_window, score_window)
+    _, paddle_pos, ball_pos = parse_output(output, game_window, score_window)
     score = 0
+    frame_delay = 0 if play_mode == PlayMode.AUTO else 500
 
     while not computer.is_halted():
 
         c = input_window.getch()  # returns -1 if no key was pressed in nodelay mode
-        input_ = INPUT_MAP.get(c, 0)
+
+        if c == 27:  # esc
+            print("Escaping...")
+            break
+
+        if c == 32:  # spacebar
+            frame_delay = 50 if frame_delay == 500 else 500
+
+        if play_mode == PlayMode.MANUAL:
+            input_ = INPUT_MAP.get(c, 0)
+        elif play_mode == PlayMode.AUTO:
+            if paddle_pos[0] > ball_pos[0]:
+                input_ = -1
+            elif paddle_pos[0] < ball_pos[0]:
+                input_ = 1
+            else:
+                input_ = 0
+        else:
+            input_ = 0
 
         computer.pass_input(input_)
         output = computer.read_output()
-        new_score = draw_output_and_return_score(output, game_window, score_window)
-        score = new_score or score
+        things = parse_output(output, game_window, score_window)
+        score = things[0] or score
+        paddle_pos = things[1] or paddle_pos
+        ball_pos = things[2] or ball_pos
 
-        curses.napms(300)
+        curses.napms(frame_delay)
 
-    print(f"Finished the game with final score: {score}")
+    print(f"Game exited with final score: {score}")
 
 
 def main():
-    print("Starting arcade game...")
+    print("Starting game...")
     curses.wrapper(run_terminal)
 
 
