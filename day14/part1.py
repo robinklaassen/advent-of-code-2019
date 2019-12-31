@@ -1,24 +1,16 @@
-from typing import List
-
-from day14.nanofactory import Nanofactory, Order
-from day14.recipe import Recipe
-
-
-def parse_input(filename: str) -> List[Recipe]:
-    recipes = []
-    with open(filename, 'r') as fp:
-        for _, line in enumerate(fp):
-            recipe = Recipe.from_string(line.rstrip())
-            recipes.append(recipe)
-    return recipes
+from day14.nanofactory import Nanofactory
+from day14.parse_input import parse_input
 
 
 def main():
-    recipes = parse_input('test_input_small.txt')
+    recipes = parse_input('puzzle_input.txt')
     factory = Nanofactory(recipes=recipes)
-    factory.place_order(Order(name='FUEL', qty=1))
-    used_ore = factory.get_used_ore_count()
-    print(f"Used {used_ore} ORE")
+
+    print(factory._sorted_chemicals)
+
+    # factory.place_order(name='FUEL', qty=1)
+    # used_ore = factory.get_used_ore_count()
+    # print(f"Used {used_ore} ORE")
 
 
 if __name__ == "__main__":
