@@ -6,11 +6,15 @@ def main():
     recipes = parse_input('puzzle_input.txt')
     factory = Nanofactory(recipes=recipes)
 
-    print(factory._sorted_chemicals)
+    # print(factory._sorted_chemicals)
 
-    # factory.place_order(name='FUEL', qty=1)
-    # used_ore = factory.get_used_ore_count()
-    # print(f"Used {used_ore} ORE")
+    factory.place_order(name='FUEL', qty=1)
+    factory.start()
+
+    print(f"Open orders: {factory._orders}")
+    print(f"Stockpile: {factory._stockpile}")
+
+    print(f"Submit value: {factory.get_ore_amount()}")
 
 
 if __name__ == "__main__":

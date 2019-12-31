@@ -12,20 +12,23 @@ class Nanofactory:
     def __init__(self, recipes: List[Recipe]):
         self.recipes = recipes
         self._orders = Counter()
-        self._stock = Counter()
-
-        self._ore_start_count = int(1e10)  # should simulate infinite amount, increase if causing errors
-        self._stock['ORE'] = self._ore_start_count
+        self._stockpile = Counter()
 
         self._sorted_chemicals = self._sort_chemicals()
 
     def place_order(self, name: str, qty: int):
         print(f"An order was placed for {qty} {name}")
         self._orders[name] += qty
+
+    def start(self):
         self._handle_orders()
 
-    def get_used_ore_count(self) -> int:
-        return self._ore_start_count - self._stock['ORE']
+    def get_ore_amount(self) -> int:
+        return self._orders['ORE']
+
+    def reset(self):
+        self._orders = Counter()
+        self._stockpile = Counter()
 
     def _sort_chemicals(self) -> List[str]:
         """Topological sorting of the chemicals in all recipes, returns a sorted list with end result first"""
@@ -41,61 +44,30 @@ class Nanofactory:
 
         return list(nx.topological_sort(graph))[::-1]
 
-    def _can_make(self, recipe: Recipe, multiplier: int = 1) -> bool:
-        can_make = True
-        for ing, qty in recipe.ingredients.items():
-            if self._stock[ing] < qty * multiplier:
-                can_make = False
+    def _handle_orders(self):
+        while True:
+            name = next(filter(lambda c: self._orders[c] > 0, self._sorted_chemicals))
+            if name == 'ORE':
                 break
-        return can_make
+            qty = self._orders[name]
+            self._handle_single_order(name, qty)
+
+    def _handle_single_order(self, name: str, qty: int):
+        recipe = next(filter(lambda x: x.results_in(name), self.recipes))
+        multiplier = math.ceil(qty / recipe.results[name])
+        self._process_recipe(recipe, multiplier)
 
     def _process_recipe(self, recipe: Recipe, multiplier: int = 1):
-        ...
+        for res, qty in recipe.results.items():
+            amount_made = qty * multiplier
+            amount_ordered = self._orders[res]
+            excess = amount_made - amount_ordered
+            self._stockpile[res] += excess
+            self._orders[res] = 0
 
-    def _handle_orders(self):
-
-        while any(self._orders.values()):
-
-            chemical_to_make = next(filter(lambda name: self._orders[name] > 0, self._sorted_chemicals))
-            recipe = next(filter(lambda x: x.results_in(chemical_to_make), self.recipes))
-            multiplier = math.ceil(self._orders[chemical_to_make] / recipe.results[chemical_to_make])
-
-            # Check if this can be made with the current stock, else place orders for items that are short
-            can_make = True
-            for ingredient_name, ingredient_qty in recipe.ingredients.items():
-                amount_short = (ingredient_qty * multiplier) - self._stock[ingredient_name]
-                if amount_short > 0:
-                    self.place_order(name=ingredient_name, qty=amount_short)
-                    can_make = False
-
-            if can_make:
-                self._process_recipe(recipe, multiplier)
-
-        # while True:
-        #
-        #     if len(self._order_queue) == 0:
-        #         break
-        #
-        #     order = self._order_queue[-1]
-        #     recipe = next(filter(lambda x: x.results_in(order.name), self.recipes))
-        #     multiplier = math.ceil(order.qty / recipe.results[order.name])
-        #
-        #     # Check if this can be made with the current stock, else place orders for items that are short
-        #     can_make = True
-        #     for ingredient_name, ingredient_qty in recipe.ingredients.items():
-        #         amount_short = (ingredient_qty * multiplier) - self._stock[ingredient_name]
-        #         if amount_short > 0:
-        #             self.place_order(Order(name=ingredient_name, qty=amount_short))
-        #             can_make = False
-        #
-        #     if can_make:
-        #         # Remove the ingredients
-        #         for ingredient_name, ingredient_qty in recipe.ingredients.items():
-        #             self._stock[ingredient_name] -= (ingredient_qty * multiplier)
-        #
-        #         # Add the results
-        #         for result_name, result_qty in recipe.results.items():
-        #             self._stock[result_name] += (result_qty * multiplier)
-        #
-        #         # Remove the order
-        #         self._order_queue.remove(order)
+        for ing, qty in recipe.ingredients.items():
+            amount_to_make = qty * multiplier
+            available_in_stockpile = self._stockpile[ing]
+            amount_to_order = amount_to_make - available_in_stockpile
+            self.place_order(ing, amount_to_order)
+            self._stockpile[ing] = 0

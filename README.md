@@ -139,3 +139,13 @@ but that wasn't even necessary. Part 2 had me look into Python's
 worked! Then the problem arose: I couldn't beat the game by hand
 :')  as I visited the subreddit the first suggestion popping up
 there was to make an auto player... easy enough. And fun to watch!
+
+### Day 14
+This was a challenge for me, although I still can't quite pinpoint
+_why_. I had to revisit my model design several time. Finding the
+term 'topological sort' on the subreddit did help to put the idea
+lingering in my head into proper (and easy, using `networkx` again)
+code. Part 1 could be solved without accounting for waste, but part 2
+could not... luckily that didn't turn out too hard. I'm quite
+satisfied with how my approach algorithm works, even though it's
+likely not the fastest way.
