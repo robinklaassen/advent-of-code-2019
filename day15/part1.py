@@ -1,101 +1,111 @@
 import random
-from enum import Enum, auto
-from typing import Tuple, Set
 
-from dataclasses import dataclass
+from pathfinding.core.diagonal_movement import DiagonalMovement
+from pathfinding.core.grid import Grid
+from pathfinding.finder.a_star import AStarFinder
 
 from day11.intcode_computer import IntcodeComputer
+from day15.direction import Direction, TURN_RIGHT, TURN_LEFT
+from day15.explorable_grid import ExplorableGrid
+from day15.node import State
 from day15.puzzle_input import REPAIR_DROID_PROGRAM
 
-DROID_ITERATIONS = 100000
+MAX_ITERATIONS = 10000
 
-
-class Direction(Enum):
-    NORTH = 1
-    SOUTH = 2
-    WEST = 3
-    EAST = 4
-
-
-POSITION_MODIFIER = {
-    Direction.NORTH: lambda x, y: (x, y - 1),
-    Direction.SOUTH: lambda x, y: (x, y + 1),
-    Direction.WEST: lambda x, y: (x - 1, y),
-    Direction.EAST: lambda x, y: (x + 1, y),
+COMPUTER_OUTPUT_TO_STATE_MAP = {
+    0: State.WALL,
+    1: State.EMPTY,
+    2: State.TARGET,
 }
-
-
-class State(Enum):
-    EMPTY = auto()
-    WALL = auto()
-    OXYGEN_SYSTEM = auto()
-
-
-@dataclass(frozen=True)  # immutable
-class PositionInfo:
-    x: int
-    y: int
-    state: State
-
-
-def new_pos(x: int, y: int, direction: Direction) -> Tuple[int, int]:
-    return POSITION_MODIFIER[direction](x, y)
-
-
-def print_map(infos: Set[PositionInfo]):
-    x_list = [p.x for p in infos]
-    y_list = [p.y for p in infos]
-    x_min, x_max, y_min, y_max = min(x_list), max(x_list), min(y_list), max(y_list)
-
-    for y in range(y_min, y_max + 1):
-        line = ""
-        for x in range(x_min, x_max + 1):
-            try:
-                pi = next(filter(lambda p: p.x == x and p.y == y, infos))
-                if pi.state == State.EMPTY:
-                    char = '.'
-                elif pi.state == State.WALL:
-                    char = '#'
-                elif pi.state == State.OXYGEN_SYSTEM:
-                    char = 'O'
-            except StopIteration:
-                char = ' '
-            line += char
-        print(line)
-
-
 
 
 def main():
     computer = IntcodeComputer(REPAIR_DROID_PROGRAM)
     computer.start()
 
-    droid_x = 0
-    droid_y = 0
+    grid = ExplorableGrid()
 
-    infos = set()
-    infos.add(PositionInfo(0, 0, State.EMPTY))
+    explore_by_left_wall(computer, grid)
 
-    for _ in range(DROID_ITERATIONS):
-        direction: Direction = random.choice(list(Direction))  # randomize! we can find an algorithm later
+    grid.print()
+
+    find_path_length_to_target(grid)
+
+
+def explore_by_left_wall(computer: IntcodeComputer, grid: ExplorableGrid):
+
+    agent_facing = Direction.NORTH
+
+    for t in range(MAX_ITERATIONS):
+        computer.pass_input(agent_facing.value)
+        output = computer.read_output()
+        assert len(output) == 1
+        output = output[0]
+
+        found_state = COMPUTER_OUTPUT_TO_STATE_MAP[output]
+        grid.add_node_in_direction(agent_facing, found_state)
+        if found_state is State.WALL:
+            agent_facing = TURN_RIGHT[agent_facing]
+        else:
+            grid.move_agent(agent_facing)
+            agent_facing = TURN_LEFT[agent_facing]
+
+        if t > 5 and grid.agent_position == (0, 0):
+            break
+
+
+def find_path_length_to_target(explorable_grid: ExplorableGrid):
+    node_matrix = explorable_grid._nodes_to_list()
+    grid_matrix = []
+    for node_row in node_matrix:
+        grid_row = list(map(lambda n: 0 if n.state == State.WALL else 1, node_row))
+        grid_matrix.append(grid_row)
+
+    pathfinding_grid = Grid(matrix=grid_matrix)
+
+    target_node = [n for n in explorable_grid.nodes if n.state == State.TARGET]
+    assert len(target_node) == 1
+    target_node = target_node[0]
+
+    start_coords = explorable_grid.transform_coordinates_to_topleft_origin((0, 0))
+    target_coords = explorable_grid.transform_coordinates_to_topleft_origin((target_node.x, target_node.y))
+
+    start = pathfinding_grid.node(*start_coords)
+    end = pathfinding_grid.node(*target_coords)
+
+    finder = AStarFinder(diagonal_movement=DiagonalMovement.never)
+    path, runs = finder.find_path(start, end, pathfinding_grid)
+
+    print(pathfinding_grid.grid_str(path=path, start=start, end=end))
+
+    print(f"Number of steps required: {len(path) - 1}")
+
+
+def explore_randomly(computer, grid):
+    step_counter = 0
+    for _ in range(MAX_ITERATIONS):  # TODO when does this loop end?
+        adj_nodes = grid.get_adjacent_nodes()
+
+        # Pick a direction and put into computer
+        # If there are unknowns, pick one of them. If there are no unknowns, pick an empty.
+        unknown_nodes = {k: v for k, v in adj_nodes.items() if v.state == State.UNKNOWN}
+        if len(unknown_nodes) > 0:
+            direction = random.choice(list(unknown_nodes.keys()))
+        else:
+            moveable_nodes = {k: v for k, v in adj_nodes.items() if v.state != State.WALL}
+            direction = random.choice(list(moveable_nodes.keys()))
+
         computer.pass_input(direction.value)
         output = computer.read_output()
         assert len(output) == 1
         output = output[0]
 
-        new_x, new_y = new_pos(droid_x, droid_y, direction)
-
-        if output == 0:  # hit a wall, didn't move
-            infos.add(PositionInfo(new_x, new_y, State.WALL))
-        elif output == 1:  # moved successfully
-            infos.add(PositionInfo(new_x, new_y, State.EMPTY))
-            droid_x, droid_y = new_x, new_y
-        elif output == 2:  # moved and found oxygen system
-            infos.add(PositionInfo(new_x, new_y, State.OXYGEN_SYSTEM))
-            droid_x, droid_y = new_x, new_y
-
-    print(f"Length of info set: {len(infos)}")
-    print_map(infos)
+        # Handle output
+        found_state = COMPUTER_OUTPUT_TO_STATE_MAP[output]
+        value = step_counter if found_state is not State.WALL else None
+        grid.add_node_in_direction(direction, found_state, value)
+        if found_state is not State.WALL:
+            grid.move_agent(direction)
 
 
 if __name__ == "__main__":
