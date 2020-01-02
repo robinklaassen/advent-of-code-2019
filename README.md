@@ -149,3 +149,20 @@ code. Part 1 could be solved without accounting for waste, but part 2
 could not... luckily that didn't turn out too hard. I'm quite
 satisfied with how my approach algorithm works, even though it's
 likely not the fastest way.
+
+### Day 15
+Another big challenge. I quickly created a completely random explorer
+droid, but after 100k iterations (runtime ~ 10 seconds) it did not
+have the entire map. After some pondering and subredditing, I explored
+the entire grid first by left-wall-hugging, then used the `pathfinding`
+module for Python to get the path length to the oxygen tank.
+
+Part 2 then was tricky because I made my grid nodes immutable (to be
+able to use them in a `set`). So I copied all nodes to mutable nodes
+and got to work. My first solution (iterating over oxygenated nodes
+and oxygenating the adjacent ones) is quite inelegant and doesn't
+perform at all, but it got me the right answer.
+
+I notice my code is getting less elegant as the puzzles increase in
+complexity, which is troubling seeing that elegant code is the only
+thing than can make complex problems manageable...

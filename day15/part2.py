@@ -26,6 +26,7 @@ def main():
         oxygenated_nodes = [n for n in mutable_nodes if n.state == State.OXYGENATED]
         oxygenation_counter = 0
 
+        # For every currently oxygenated node, oxygenate the adjacent nodes
         for on in oxygenated_nodes:
             for x, y in [(on.x+1, on.y), (on.x-1, on.y), (on.x, on.y-1), (on.x, on.y+1)]:
                 tn = next(filter(lambda mn: mn.x == x and mn.y == y, mutable_nodes), None)
@@ -33,10 +34,11 @@ def main():
                     tn.state = State.OXYGENATED
                     oxygenation_counter += 1
 
+        # We're done if there are no more nodes being oxygenated in this minute
         if oxygenation_counter == 0:
             break
 
-    print(t)
+    print(f"Full oxygenation after {t} minutes")
 
 
 if __name__ == "__main__":
