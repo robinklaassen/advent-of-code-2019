@@ -12,8 +12,12 @@ def main():
 
     print(f"Graph has {len(keys)} keys and {len(doors)} doors")
 
+    door_blocks = []
     for door in doors:
         blocked_keys = get_keys_blocked_by_door(graph, door)
+        if not blocked_keys:
+            continue
+        door_blocks.append((door, blocked_keys))
         print(f"Door {door} blocks keys {blocked_keys}")
 
     print(f"Total possible permutations of keys: {factorial(len(keys))}")
