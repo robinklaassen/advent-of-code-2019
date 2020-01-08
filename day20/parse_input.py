@@ -34,19 +34,24 @@ def parse_input(filename: str, with_donut_connections: bool = True) -> nx.Graph:
         if ax == x + 1:  # right
             char2 = grid[y][x+2]
             mark = char + char2
+            direction = 'right'
         elif ax == x - 1:  # left
             char2 = grid[y][x-2]
             mark = char2 + char
+            direction = 'left'
         elif ay == y + 1:  # down
             char2 = grid[y+2][x]
             mark = char + char2
+            direction = 'down'
         elif ay == y - 1:  # up
             char2 = grid[y-2][x]
             mark = char2 + char
+            direction = 'up'
         else:
             raise Exception
 
         graph.nodes[(x, y)]['mark'] = mark
+        graph.nodes[(x, y)]['mark_type'] = _get_mark_type(grid, x, y, direction)
 
     # If required, connect the marked nodes in the graph
     if with_donut_connections:
@@ -70,3 +75,29 @@ def _file_to_grid(filename: str) -> List[List[str]]:
                 row.append(char)
             grid.append(row)
     return grid
+
+
+def _get_mark_type(grid: List[List[str]], x: int, y: int, direction: str) -> str:
+    if direction == 'left':
+        ax, ay = x-3, y
+    elif direction == 'right':
+        ax, ay = x+3, y
+    elif direction == 'up':
+        ax, ay = x, y-3
+    elif direction == 'down':
+        ax, ay = x, y+3
+    else:
+        raise Exception
+
+    if ax == -1 or ay == -1:
+        return 'outer'
+
+    try:
+        char = grid[ay][ax]
+    except IndexError:
+        return 'outer'
+
+    if char == ' ':
+        return 'inner'
+
+    raise Exception
