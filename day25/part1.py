@@ -1,6 +1,6 @@
 from typing import List
 
-from day11.intcode_computer import IntcodeComputer
+from day11.intcode_computer import IntcodeComputer, ComputerState
 from day25.puzzle_input import DROID_ASCII_PROGRAM
 
 
@@ -13,7 +13,7 @@ def command_to_computer_input(command: str) -> List[int]:
     result = []
     for c in command:
         result.append(ord(c))
-    result.append(10)
+    result.append(10)  # newline to finish input
     return result
 
 
@@ -24,6 +24,9 @@ def main():
     while True:
         output = computer.read_output()
         print_computer_output(output)
+
+        if computer.state != ComputerState.WAITING_FOR_INPUT:
+            break
 
         s = input("-->")
         computer_input = command_to_computer_input(s)
